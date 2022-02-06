@@ -14,6 +14,7 @@
 
 	 function reset(){
 		 file.update(n => n = null);
+		 submit = false;
 	// 	promise = Promise.resolve([])
 	// 	imageSource = DEFAULT;
 	}
