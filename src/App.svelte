@@ -31,14 +31,27 @@
 			redirect: 'follow'
 		})
 		.then(async (response) => {
-			console.log("BALLS")
-			const getImageUrl = await fetch(`/api/get-url/image-url`)
-			const json = await getImageUrl.json();
-			console.log("BALLS")
-			fetch(`https://api.pushcut.io/qVMVMZOZQn_DpG6bmZrAv/notifications/Set-Wallpaper?text=\"Hello!\"&image=${""}&input=${json.url}`, {
-				"Content-Type": "application/json",
-				"method": "POST",				
+			const getImageUrl = await fetch(`/api/get-url/image-url`,{
+				headers:{
+					'Content-Type':'image/png'
+				}
 			})
+			const json = await getImageUrl.json();
+			console.log(json.url);
+
+			// ?text=\"${json.url}\"&image=\"${json.url}\"&input=\"${json.url}\
+			fetch("https://api.pushcut.io/qVMVMZOZQn_DpG6bmZrAv/notifications/Set-Wallpaper", {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ 
+					title: 'WALLPAPER SUGGESTION',
+					image:json.url,
+					input:json.url
+				})
+			})
+
 		})
   	.catch(error => console.log('error', error));
 	}

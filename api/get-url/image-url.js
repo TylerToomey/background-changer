@@ -14,14 +14,17 @@ export default function handleEvent(req,res){
 		const myKey = 'background.png'
 		const signedUrlExpireSeconds = 60 * 5
 
+		// Create a presigned URL for a potential object named background.png {myKey}
 		const url = s3.getSignedUrl('getObject', {
 			Bucket: myBucket,
 			Key: myKey,
 			Expires: 60,
-			contentType: "image/png"
-
+			ResponseContentType:'image/png'
 		})
+
+		s3
 		res.json({url:url});
 		}catch(err){
+			res.json({error:err})
 	}
 }
