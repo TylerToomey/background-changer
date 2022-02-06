@@ -20,8 +20,12 @@
     "svelte": "^3.0.0"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.49.0",
+    "@aws-sdk/s3-request-presigner": "^3.49.0",
+    "aws-sdk": "^2.1069.0",
     "axios": "^0.25.0",
     "react-image-file-resizer": "^0.4.7",
-    "sirv-cli": "^2.0.0"
+    "sirv-cli": "^2.0.0",
+    "util": "^0.12.4"
   }
 }

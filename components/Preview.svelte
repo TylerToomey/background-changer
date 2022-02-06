@@ -1,31 +1,43 @@
 <script>
-    import { previewImage } from '../stores.js'
+    import { file } from '../stores.js'
     import { fade } from 'svelte/transition'
     import { onDestroy } from 'svelte'
-    export let src = "";
+
     
-    let fileInput;
-	let files;
+    const DEFAULT = "https://st3.depositphotos.com/23594922/31822/v/600/depositphotos_318221368-stock-illustration-missing-picture-page-for-website.jpg";
+   
+    let uploadButton, previewImage;
+    let showImage;
+
+    $:src = DEFAULT;
+    $:if(!$file) src = DEFAULT;
+
+    //$:files[0] ? src = files[0] : src = DEFAULT;
 
     function addPreview(){
-        fileInput.click();
+        uploadButton.click();
     }
 
     function onFileSelected(e){
-        let image = e.target.files[0];
-            let reader = new FileReader();
-            reader.readAsDataURL(image);
-            reader.onload = e => {
-                 $previewImage = e.target.result
-                 console.log("ASD")
-            };
+        file.update(n => uploadButton.files[0]);
+        if ($file) {
+            showImage = true;
+        const reader = new FileReader();
+        reader.addEventListener("load", function () {
+            src = reader.result;
+        });
+        reader.readAsDataURL($file);
+                return;
+        } 
+        showImage = false; 
     }
+    
 
 </script>
 
 <div class="preview-box border bg-secondary">
-    <input type="file" class="hidden aria-hidden" style="display:none" bind:this={fileInput} on:change={(e)=>onFileSelected(e)}/>   
-    <input type="image" {src} alt="" class="img-fluid btn" on:click={addPreview}>
+    <input type="file" class="hidden aria-hidden" style="display:none" bind:this={uploadButton} on:change={(e)=>onFileSelected(e)} accept="image/*"/>   
+    <input type="image" {src} alt="" class="img-fluid btn" bind:this={previewImage} on:click={addPreview}>
 </div>
 
 <style>

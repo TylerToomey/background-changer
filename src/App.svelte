@@ -1,61 +1,68 @@
 <script>
-	import { previewImage } from '../stores'
+	import { file } from '../stores'
 	import { fade } from 'svelte/transition'
 	import Preview from '../components/Preview.svelte'
-	const ENV = DEV;
-
-	console.log(ENV);
-	const DEFAULT = "https://st3.depositphotos.com/23594922/31822/v/600/depositphotos_318221368-stock-illustration-missing-picture-page-for-website.jpg";
 	
-	$:promise = Promise.resolve([])
-	$:imageSource = DEFAULT;
+	// $:promise = Promise.resolve([])
+	// $:imageSource = DEFAULT;
 
-	function reset(){
-		promise = Promise.resolve([])
-		imageSource = DEFAULT;
-	}
+	$:isFile = '';
+	$:$file ? isFile = '' : isFile = ''
+
+	 function reset(){}
+	// 	promise = Promise.resolve([])
+	// 	imageSource = DEFAULT;
+	// }
 
 	async function submitImage(){
-		try{
-			promise = await fetchImage().then((res)=>{
-				imageSource = res.url;
+		// Get a presigned URL to upload to
+		const response = await fetch('/api/get-url/upload-url')
+		const url = await response.json();
 
-				fetch("https://api.pushcut.io/qVMVMZOZQn_DpG6bmZrAv/notifications/Set-Wallpaper",
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({ 
-						title: 'hey',
-						image:imageSource,
-						input:imageSource
-					})
-				})
+		// Create FORM to send file through
+		let myHeaders = new Headers();
+		myHeaders.append("Content-Type", "image/*");
+
+		// Upload the image file to the presigned upload URL
+		fetch(url.url, {
+			method: 'PUT',
+			headers: myHeaders,
+			body: $file,
+			redirect: 'follow'
+		})
+		.then(async (response) => {
+			console.log("BALLS")
+			const getImageUrl = await fetch(`/api/get-url/image-url`)
+			const json = await getImageUrl.json();
+			console.log("BALLS")
+			fetch(`https://api.pushcut.io/qVMVMZOZQn_DpG6bmZrAv/notifications/Set-Wallpaper?text=\"Hello!\"&image=${""}&input=${json.url}`, {
+				"Content-Type": "application/json",
+				"method": "POST",				
 			})
-		} catch(e){
-			console.error(e);
-		}
+		})
+  	.catch(error => console.log('error', error));
 	}
 	async function fetchImage(){
-		const response = await fetch(`${ENV}/api/hello`)
-		console.log(`${ENV}/api/hello`)
-    	return await response.json();
-	}
+		
+	}	
 </script>
 
 
 <div id="main" class="d-flex align-self-center justify-content-center">
 	<div class="row mw-50 align-self-center justify-content-center preview-container">
-		<Preview src={imageSource}/>
+		
+		<Preview/>
+		
 		<button type="button" class="col text-center py-4 btn btn-info m-1 button-max"
 		on:click={reset}>
 			Refresh
 		</button>
-		<button type="button" class="col text-center py-4 btn btn-success m-1 button-max"
+
+		<button type="button" class="col text-center py-4 btn btn-success m-1 button-max {isFile}"
 		on:click={submitImage}>
 			Submit
 		</button>
+
    </div>
 </div> 
 
