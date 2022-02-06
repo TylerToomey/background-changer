@@ -20,16 +20,15 @@
 
     function onFileSelected(e){
         file.update(n => uploadButton.files[0]);
-        if ($file) {
-            showImage = true;
+    }
+
+    $:if ($file) {
+        showImage = true;
         const reader = new FileReader();
         reader.addEventListener("load", function () {
             src = reader.result;
         });
         reader.readAsDataURL($file);
-                return;
-        } 
-        showImage = false; 
     }
     
 

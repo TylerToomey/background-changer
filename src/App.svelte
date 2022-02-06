@@ -6,15 +6,21 @@
 	// $:promise = Promise.resolve([])
 	// $:imageSource = DEFAULT;
 
+	$:submit = false;
 	$:isFile = '';
-	$:$file ? isFile = '' : isFile = ''
+	$:$file && !submit ? isFile = '' : isFile = 'disabled'
 
-	 function reset(){}
+	let submitButton = null;
+
+	 function reset(){
+		 file.update(n => n = null);
 	// 	promise = Promise.resolve([])
 	// 	imageSource = DEFAULT;
-	// }
+	}
 
 	async function submitImage(){
+		submit = true;
+
 		// Get a presigned URL to upload to
 		const response = await fetch('/api/get-url/upload-url')
 		const url = await response.json();

@@ -21,8 +21,6 @@ export default function handleEvent(req,res){
 			Expires: 60,
 			ResponseContentType:'image/png'
 		})
-
-		s3
 		res.json({url:url});
 		}catch(err){
 			res.json({error:err})
