@@ -1,5 +1,6 @@
 <script>
     import { file } from '../stores.js'
+    import { fly } from 'svelte/transition'
     import { fade } from 'svelte/transition'
     import { onDestroy } from 'svelte'
 
@@ -12,16 +13,17 @@
     $:src = DEFAULT;
     $:if(!$file) src = DEFAULT;
 
-    //$:files[0] ? src = files[0] : src = DEFAULT;
-
-    function addPreview(){
+    // Helper function to click the actual file button which is hidden
+    function clickUploadButton(){
         uploadButton.click();
     }
 
+    // on:change of file selector, invoke this
     function onFileSelected(e){
         file.update(n => uploadButton.files[0]);
     }
 
+    // if we have a file, show it and set the src of img to the filereader render
     $:if ($file) {
         showImage = true;
         const reader = new FileReader();
@@ -33,20 +35,14 @@
     
 
 </script>
-
-<div class="preview-box border bg-secondary">
+<div in:fly="{{ y: 200, duration: 2000 }}" out:fade>
     <input type="file" class="hidden aria-hidden" style="display:none" bind:this={uploadButton} on:change={(e)=>onFileSelected(e)} accept="image/*"/>   
-    <input type="image" {src} alt="" class="img-fluid btn" bind:this={previewImage} on:click={addPreview}>
+    <input type="image" class="preview-image" {src} alt="" bind:this={previewImage} on:click={clickUploadButton}>
 </div>
 
-<style>
-    .preview-box{
-        padding:10px;
-        margin: 0 auto;
-        min-height:500px;
-        max-height:800px;
-        width:100%;
-    }
 
-  
+<style>
+    .preview-image{
+        object-fit:scale-down;
+    }
 </style>
