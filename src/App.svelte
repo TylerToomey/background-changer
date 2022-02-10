@@ -1,5 +1,5 @@
 <script>
-	import { file } from '../stores'
+	import { file, state } from '../stores'
 	
 	import { fade, fly } from 'svelte/transition'
 	import { onMount } from 'svelte';
@@ -9,11 +9,17 @@
 
 	let transitionQueue = [] 
 	let chattyQueue = {
+		loading: {
+			values:[
+				""
+			]
+		},
 		intro: {
 			values: [
 			"Hey",
 			"Set my wallpaper for me",
-			"Tap here to pick an image"
+			"Tap here to pick an image",
+			"(It will be used as my phone's wallpaper)"
 			]
 		},
 		chosen: {
@@ -30,13 +36,19 @@
 		},
 		success: {
 			values: [
-				"Nice! This is my new wallpaper now. Thanks..?"
+				"Success! Nice — This is my new wallpaper now. Thanks..?"
 			]
 		},
 		reset: {
 			values: [
 				"Phew",
 				"Okay, not that one"
+			]
+		},
+		startOver: {
+			values:[
+				"Let's try this again",
+				"Pick a cool one 😎 haha :)"
 			]
 		}
 	}
@@ -53,28 +65,28 @@
 		}
 	}
 
-	console.log(chattyQueue)
-
-	let state = "loading"
-
-	let dots = null, dotsVisible = false;
-
-	$:chatty = "Hey"
+	$:chatty = ""
 	$:submit = false;
-	$:isFile = '';
+
+	$:disableSubmit = '';
+	$:disableReset = '';
 
 	// If we have a file and we haven't submitted anything, allow submit button. Otherwise, disable the button.
 	// (We don't want people submitting an image over and over)
-	$:$file && !submit ? isFile = '' : isFile = 'disabled'
+	$:$file && !submit ? disableSubmit = '' : disableSubmit = 'disabled'
+	$:$file ? disableReset = '' : disableReset = 'disabled';
 
 	 function reset(){
 		 file.update(n => n = null);
+		 if($state == "success"){
+			 $state = "startOver";
+		 }else $state = "reset"
 		 submit = false;
 	}
 
 	async function submitImage(){
 		submit = true;
-
+		$state = "submit";
 		// Get a presigned URL to upload to
 		const presignedPutUrlPromise = await fetch('/api/get-url/upload-url')
 		const presignedPutUrl = await presignedPutUrlPromise.json();
@@ -107,6 +119,9 @@
 					image:presignedGetUrl.url,
 					input:presignedGetUrl.url
 				})
+			}).then(()=>{
+				$state = "success"
+				submit = false;
 			})
 
 		})
@@ -114,7 +129,7 @@
 	}
 
 	onMount(() => { 
-		state = "intro";
+		$state = "intro";
 		console.log(state)
 		const dotTimer = setInterval(() => {
 
@@ -122,9 +137,11 @@
 
 		introTransitionNext();
 		const chattyTimer = setInterval(() => {
-			chatty = chattyQueue?.[state].next(chatty);
+			chatty = chattyQueue?.[$state].next(chatty);
 		}, 5000);
 	});
+
+	$:$state, chatty = chattyQueue?.[$state].next(chatty);
 
 	function introTransitionNext(){
 		transitionQueue = [...transitionQueue, true]
@@ -139,8 +156,8 @@
 				<h1 class="chatty" in:fly="{{ y: 99.00, duration: 2000 }}"
 				on:introend={introTransitionNext}>
 					{chatty}
-				</h1>
-				<div bind:this={dots} transition:fade
+				</h1 >
+				<div transition:fade
 				></div>
 			{/if}
 
@@ -148,23 +165,34 @@
 				<div class="control" 
 					transition:fade="{{duration: 1000}}"
 					on:introend={introTransitionNext}>
+					
+					{#if transitionQueue[2]}
+					<div in:fly="{{ y: 200, duration: 1000 }}" 
+					out:fade 					
+					on:introend={introTransitionNext}>	
+					<Preview />
+					</div>
+					{/if}
+					{#if transitionQueue[3]}
+					<button type="button" class="btn button btn-block btn-lg btn-warning"
+					transition:fade
+					on:introend={introTransitionNext}
+					on:click={reset}>
+						Refresh
+					</button>
+					{/if}
+					{#if transitionQueue[4]}
+					<button type="button" class="btn button btn-block btn-lg btn-success {disableSubmit}"
+					transition:fade
+					on:introend={introTransitionNext}
+					on:click={submitImage}>
+						Submit
+					</button>
+					{/if}
 				</div>
 			{/if}
 
-			<!-- <Preview on:click={test}/>
-			<button type="button" class="button-max"
-			in:fly="{{ y: 1-0, duration: 1000 }}" 
-			out:fade
-			on:click={reset}>
-				Refresh
-			</button>
-
-			<button type="button" class="button-max {isFile}"
-			in:fly="{{ y: 200, duration: 2600 }}" 
-			out:fade
-			on:click={submitImage}>
-				Submit
-			</button>	 -->
+			
 		</div>
 		{/if}
 </div>
@@ -173,16 +201,23 @@
 
 	.chatty {
 		color:white;
+		vertical-align: bottom;
+		display: table-cell;
+		height:80px;
+		font-size: 1.5rem;
+	}
+	.button{
+		padding: 10px 32.4%;
 	}
 
-	.control{
-		margin:0 auto;
-		background-color: ghostwhite;
-		opacity:0.2;
+	.control{	
+		display:grid;
+		background-color:rgba(255,255,255,0.5);
 		width:100%;
 		height:100%;
 		border-radius:6px;
-		box-shadow: 10px 10px 10px black;
+		box-shadow: 10px 10px 10px rgba(0,0,0,0.5);
+		place-items:center;
 	}
 
 	.app-container {
@@ -206,12 +241,12 @@
 		/* background-color: blue;	 */
 	}
 	
-	@media (min-width: 768px){
+	/* @media (min-width: 768px){
 		.app-container div {
 			width:100px;
 			height:100px;
 			background-color: brown;	
 		}
-	}
+	} */
 
 </style>

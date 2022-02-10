@@ -1,5 +1,5 @@
 <script>
-    import { file } from '../stores.js'
+    import { file, state } from '../stores.js'
     import { fly } from 'svelte/transition'
     import { fade } from 'svelte/transition'
     import { onDestroy } from 'svelte'
@@ -20,7 +20,9 @@
 
     // on:change of file selector, invoke this
     function onFileSelected(e){
+        $state = "chosen"
         file.update(n => uploadButton.files[0]);
+
     }
 
     // if we have a file, show it and set the src of img to the filereader render
@@ -35,14 +37,14 @@
     
 
 </script>
-<div in:fly="{{ y: 200, duration: 2000 }}" out:fade>
-    <input type="file" class="hidden aria-hidden" style="display:none" bind:this={uploadButton} on:change={(e)=>onFileSelected(e)} accept="image/*"/>   
-    <input type="image" class="preview-image" {src} alt="" bind:this={previewImage} on:click={clickUploadButton}>
-</div>
+<input type="file" class="hidden aria-hidden" style="display:none" bind:this={uploadButton} on:change={(e)=>onFileSelected(e)} accept="image/*"/>   
+<input type="image" class="preview-image" {src} alt="" bind:this={previewImage} on:click={clickUploadButton}>
 
 
 <style>
     .preview-image{
-        object-fit:scale-down;
+        object-fit: cover;
+        max-width:300px
+    
     }
 </style>
