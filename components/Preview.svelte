@@ -5,7 +5,7 @@
     import { onDestroy } from 'svelte'
 
     
-    const DEFAULT = "https://st3.depositphotos.com/23594922/31822/v/600/depositphotos_318221368-stock-illustration-missing-picture-page-for-website.jpg";
+    const DEFAULT = ""//"https://st3.depositphotos.com/23594922/31822/v/600/depositphotos_318221368-stock-illustration-missing-picture-page-for-website.jpg";
    
     let uploadButton, previewImage;
     let showImage;
@@ -44,7 +44,14 @@
 <style>
     .preview-image{
         object-fit: cover;
-        max-width:300px
-    
+        aspect-ratio:9/16;
+        width:100%;
+        margin-bottom:1rem;
+        background-color: rgba(255,255,255,0.1);
+        user-select:none;
+        border-style:none;
+        outline-width:0;
+        outline:none;
+
     }
 </style>

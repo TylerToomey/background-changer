@@ -19,7 +19,10 @@
 			"Hey",
 			"Set my wallpaper for me",
 			"Tap here to pick an image",
-			"(It will be used as my phone's wallpaper)"
+			"(It will be used as my phone's wallpaper)",
+			"Pick a cool one 😎 haha :)",
+			"...",
+			"It's okay, take your time :) haha"
 			]
 		},
 		chosen: {
@@ -73,7 +76,7 @@
 
 	// If we have a file and we haven't submitted anything, allow submit button. Otherwise, disable the button.
 	// (We don't want people submitting an image over and over)
-	$:$file && !submit ? disableSubmit = '' : disableSubmit = 'disabled'
+	$:($file && !submit) && $state != 'success' ? disableSubmit = '' : disableSubmit = 'disabled'
 	$:$file ? disableReset = '' : disableReset = 'disabled';
 
 	 function reset(){
@@ -125,12 +128,11 @@
 			})
 
 		})
-  	.catch(error => console.log('error', error));
+  	.catch();
 	}
 
 	onMount(() => { 
 		$state = "intro";
-		console.log(state)
 		const dotTimer = setInterval(() => {
 
 		}, 400);
@@ -153,42 +155,47 @@
 	{#if state != "loading"}
 		<div>
 			{#if transitionQueue[0]}
-				<h1 class="chatty" in:fly="{{ y: 99.00, duration: 2000 }}"
+				<h1 class="chatty"
+				transition:fade={{duration:2000}}
 				on:introend={introTransitionNext}>
 					{chatty}
 				</h1 >
-				<div transition:fade
-				></div>
 			{/if}
 
 			{#if transitionQueue[1]}
-				<div class="control" 
-					transition:fade="{{duration: 1000}}"
-					on:introend={introTransitionNext}>
+				<div class="control container-fluid"
+				transition:fade={{duration:2000}}>
+					<div class="row d-flex justify-content-center">
+						<div class="col d-flex justify-content-center pt-3" in:fly="{{ y: 200, duration: 2000 }}" 
+						out:fade 					
+						on:introend={introTransitionNext}>	
+							<Preview />
+						</div>
+					</div>
 					
 					{#if transitionQueue[2]}
-					<div in:fly="{{ y: 200, duration: 1000 }}" 
-					out:fade 					
-					on:introend={introTransitionNext}>	
-					<Preview />
+					<div class="col d-flex justify-content-center">
+						<button type="button" class="btn button btn-block btn-warning"
+						transition:fade
+						on:introend={introTransitionNext}
+						on:click={reset}>
+							Refresh
+						</button>
 					</div>
 					{/if}
 					{#if transitionQueue[3]}
-					<button type="button" class="btn button btn-block btn-lg btn-warning"
-					transition:fade
-					on:introend={introTransitionNext}
-					on:click={reset}>
-						Refresh
-					</button>
+					<div class="col d-flex justify-content-center">
+						<button type="button" class="btn button btn-block btn-success {disableSubmit}"
+						transition:fade
+						on:introend={introTransitionNext}
+						on:click={submitImage}>
+							Submit
+						</button>
+					</div>
 					{/if}
-					{#if transitionQueue[4]}
-					<button type="button" class="btn button btn-block btn-lg btn-success {disableSubmit}"
-					transition:fade
-					on:introend={introTransitionNext}
-					on:click={submitImage}>
-						Submit
-					</button>
-					{/if}
+
+					
+					
 				</div>
 			{/if}
 
@@ -199,22 +206,27 @@
 
 <style>
 
-	.chatty {
+.chatty {
 		color:white;
 		vertical-align: bottom;
 		display: table-cell;
 		height:80px;
+		top:14vh;
 		font-size: 1.5rem;
+		position:absolute;
+		user-select:none;
+
 	}
 	.button{
-		padding: 10px 32.4%;
+		width:100%;
+		margin-bottom:1rem
 	}
 
 	.control{	
-		display:grid;
 		background-color:rgba(255,255,255,0.5);
+		aspect-ratio:9/16;
 		width:100%;
-		height:100%;
+		max-height:500px;
 		border-radius:6px;
 		box-shadow: 10px 10px 10px rgba(0,0,0,0.5);
 		place-items:center;
@@ -231,22 +243,27 @@
 
 	.app-container > div {
 		width: 400px;
+		max-width:400px;
 		padding-left:20px;
 		padding-right:20px;
 
-		height:calc(75vw*1.77);
-		max-height:600px;
-		min-height:550px;
-		padding-top:5vh;
+		
 		/* background-color: blue;	 */
 	}
 	
-	/* @media (min-width: 768px){
-		.app-container div {
-			width:100px;
-			height:100px;
-			background-color: brown;	
-		}
-	} */
+	@media (min-width: 768px){
+		.chatty {
+			color:white;
+			max-width: 260px;
+			height:80px;
+			top:14vh;
+			right:65vw;
+			font-size: 1.5rem;
+			text-align:end;
+			position:absolute;
+			user-select:none;
+
+	}
+	} 
 
 </style>
