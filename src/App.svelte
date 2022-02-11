@@ -211,7 +211,7 @@
 		vertical-align: bottom;
 		display: table-cell;
 		height:80px;
-		top:14vh;
+		top:10vh;
 		font-size: 1.5rem;
 		position:absolute;
 		user-select:none;
