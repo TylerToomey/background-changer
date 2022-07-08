@@ -12,7 +12,7 @@ export default function handleEvent(req,res){
 	try{
 		const myBucket = process.env.AWS_BUCKET_NAME_BS
 		const myKey = 'background.png'
-		const signedUrlExpireSeconds = 60 * 5
+		const signedUrlExpireSeconds = 60 * 60
 
 		// Create a presigned URL for a potential object named background.png {myKey}
 		const url = s3.getSignedUrl('getObject', {

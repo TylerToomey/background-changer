@@ -1,7 +1,7 @@
 <script>
 	import { file, state } from '../stores'
 	
-	import { fade, fly } from 'svelte/transition'
+	import { fade, fly, slide} from 'svelte/transition'
 	import { onMount } from 'svelte';
 
 	import Preview from '../components/Preview.svelte'
@@ -16,13 +16,11 @@
 		},
 		intro: {
 			values: [
-			"Hey",
-			"Set my wallpaper for me",
-			"Tap here to pick an image",
-			"(It will be used as my phone's wallpaper)",
-			"Pick a cool one 😎 haha :)",
-			"...",
-			"It's okay, take your time :) haha"
+				"Hey",
+				"Click on the empty box and choose a picture",
+				"Click on the empty box and choose a picture",
+				"The picture you choose will become my iPhone's wallpaper",
+				"The picture you choose will become my iPhone's wallpaper"
 			]
 		},
 		chosen: {
@@ -39,19 +37,20 @@
 		},
 		success: {
 			values: [
-				"Success! Nice — This is my new wallpaper now. Thanks..?"
+				"Success!",
+				"Nice — This is my new wallpaper now. Thanks..?"
 			]
 		},
 		reset: {
 			values: [
+				"Okay, not that one",
 				"Phew",
-				"Okay, not that one"
+				"Click on the empty box and choose a picture"
 			]
 		},
 		startOver: {
 			values:[
 				"Let's try this again",
-				"Pick a cool one 😎 haha :)"
 			]
 		}
 	}
@@ -72,18 +71,21 @@
 	$:submit = false;
 
 	$:disableSubmit = '';
-	$:disableReset = '';
+	let disableReset = '';
 
+	$: console.log($state, $file, disableReset);
 	// If we have a file and we haven't submitted anything, allow submit button. Otherwise, disable the button.
 	// (We don't want people submitting an image over and over)
+
 	$:($file && !submit) && $state != 'success' ? disableSubmit = '' : disableSubmit = 'disabled'
-	$:$file ? disableReset = '' : disableReset = 'disabled';
+	$:$file && ($state != "intro" || $state != "loading") ? disableReset = '' : disableReset = 'disabled';
 
 	 function reset(){
-		 file.update(n => n = null);
+		location.reload()
+		 file.set(null)
 		 if($state == "success"){
-			 $state = "startOver";
-		 }else $state = "reset"
+			 $state = "intro";
+		 }else $state = "intro"
 		 submit = false;
 	}
 
@@ -150,19 +152,17 @@
 	}
 
 </script>
-
+{#key chatty}
+	<div class="chatty"
+	transition:fade={{duration:300}}>
+		{chatty}
+	</div>
+{/key}
 <div class="app-container">
 	{#if state != "loading"}
 		<div>
-			{#if transitionQueue[0]}
-				<h1 class="chatty"
-				transition:fade={{duration:2000}}
-				on:introend={introTransitionNext}>
-					{chatty}
-				</h1 >
-			{/if}
+			
 
-			{#if transitionQueue[1]}
 				<div class="control container-fluid"
 				transition:fade={{duration:2000}}>
 					<div class="row d-flex justify-content-center">
@@ -173,17 +173,15 @@
 						</div>
 					</div>
 					
-					{#if transitionQueue[2]}
 					<div class="col d-flex justify-content-center">
-						<button type="button" class="btn button btn-block btn-warning"
+						<button type="button" class="btn button btn-block btn-warning {disableReset}"
 						transition:fade
 						on:introend={introTransitionNext}
 						on:click={reset}>
 							Refresh
 						</button>
 					</div>
-					{/if}
-					{#if transitionQueue[3]}
+			
 					<div class="col d-flex justify-content-center">
 						<button type="button" class="btn button btn-block btn-success {disableSubmit}"
 						transition:fade
@@ -192,27 +190,46 @@
 							Submit
 						</button>
 					</div>
-					{/if}
 
 					
 					
 				</div>
-			{/if}
-
 			
 		</div>
 		{/if}
+		<footer>
+			<div>
+				Made by Tyler Toomey
+			</div>
+		</footer>
 </div>
 
-<style>
 
-.chatty {
+
+<style>
+	footer {
+		position: fixed;
+		padding: 10px 10px 0px 10px;
+		bottom: 0;
+		right:0;
+		width: 200px;
+		/* Height of the footer*/ 
+		height: 40px;
+		background: white;
+		vertical-align: top;
+		text-align:center;
+		border-radius:10px;
+    }
+	.chatty {
 		color:white;
 		vertical-align: bottom;
 		display: table-cell;
-		height:80px;
+		height:800px;
+		width:10rem;
 		top:10vh;
-		font-size: 1.5rem;
+		font-size: 500px;
+		font-weight:700;
+		font-family:Arial, Helvetica, sans-serif; 
 		position:absolute;
 		user-select:none;
 

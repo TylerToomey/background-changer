@@ -5,13 +5,16 @@
     import { onDestroy } from 'svelte'
 
     
-    const DEFAULT = ""//"https://st3.depositphotos.com/23594922/31822/v/600/depositphotos_318221368-stock-illustration-missing-picture-page-for-website.jpg";
+    const DEFAULT = "https://st3.depositphotos.com/23594922/31822/v/600/depositphotos_318221368-stock-illustration-missing-picture-page-for-website.jpg";
    
     let uploadButton, previewImage;
-    let showImage;
 
     $:src = DEFAULT;
     $:if(!$file) src = DEFAULT;
+    $:if($state=="reset") {
+        src = DEFAULT;
+        file.set(null)
+    }
 
     // Helper function to click the actual file button which is hidden
     function clickUploadButton(){
@@ -21,14 +24,14 @@
     // on:change of file selector, invoke this
     function onFileSelected(e){
         $state = "chosen"
-        file.update(n => uploadButton.files[0]);
-
+        console.log("A")
+        file.set(uploadButton.files[0]);
     }
+
 
     // if we have a file, show it and set the src of img to the filereader render
     $:if ($file) {
-        showImage = true;
-        const reader = new FileReader();
+        let reader = new FileReader();
         reader.addEventListener("load", function () {
             src = reader.result;
         });
@@ -38,7 +41,7 @@
 
 </script>
 <input type="file" class="hidden aria-hidden" style="display:none" bind:this={uploadButton} on:change={(e)=>onFileSelected(e)} accept="image/*"/>   
-<input type="image" class="preview-image" {src} alt="" bind:this={previewImage} on:click={clickUploadButton}>
+<input type="image" class="preview-image" {src} alt="" on:click={clickUploadButton}>
 
 
 <style>
